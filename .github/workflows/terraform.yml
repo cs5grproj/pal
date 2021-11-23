@@ -1,0 +1,44 @@
+name: Terraform
+
+on:
+  repository_dispatch:
+    types: [build]
+
+jobs:
+
+  EC2:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    
+    steps:
+      - name: Checkout github actions repo
+        uses: actions/checkout@v2
+        with:
+          repository: anilnarayanan/githubactions
+          path: .
+
+      - name: List files
+        run: |
+          pwd
+          ls -lah
+      
+      - name: Print terraform & aws version
+        run: |
+          terraform version
+          aws --version
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Execute terraform
+        run: |
+          cd ec2
+          terraform init
+          terraform apply -auto-approve
+
